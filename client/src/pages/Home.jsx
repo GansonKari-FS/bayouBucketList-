@@ -14,7 +14,7 @@ function Home() {
         const response = await api.get("/experiences");
         setExperiences(response.data);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading adventures:", err);
         setError("Unable to load adventures.");
       } finally {
         setLoading(false);
@@ -33,7 +33,9 @@ function Home() {
       <section className="hero">
         <div className="hero-content">
           <p className="eyebrow">Explore the Pelican State</p>
+
           <h1>Discover Louisiana, one adventure at a time.</h1>
+
           <p>
             Save the places, foods, festivals, and hidden gems you want to
             experience across Louisiana.
@@ -66,7 +68,7 @@ function Home() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Your Bucket List</p>
-            <h2>Saved adventures</h2>
+            <h2>Saved Adventures</h2>
           </div>
 
           <Link to="/add" className="secondary-button">
@@ -81,39 +83,61 @@ function Home() {
         {!loading && !error && experiences.length === 0 && (
           <div className="empty-state">
             <h3>Your bucket list is empty.</h3>
+
             <p>Add your first Louisiana adventure to get started.</p>
+
             <Link to="/add" className="primary-button">
               Add First Adventure
             </Link>
           </div>
         )}
 
-        <img
-  src={imageMap[experience.imageUrl] || imageMap.swamp}
-  alt={experience.title}
-  className="adventure-image"
-/>
+        {!loading && !error && experiences.length > 0 && (
+          <div className="adventure-grid">
+            {experiences.map((experience) => (
+              <article className="adventure-card" key={experience._id}>
+                <img
+                  src={imageMap[experience.imageUrl] || imageMap.swamp}
+                  alt={experience.title}
+                  className="adventure-image"
+                />
 
-              <div className="adventure-card-body">
-                <div className="card-badges">
-                  <span className="badge">{experience.category}</span>
-                  <span className="badge">{experience.priority}</span>
+                <div className="adventure-card-body">
+                  <div className="card-badges">
+                    <span className="badge">{experience.category}</span>
+
+                    <span className="badge">
+                      {experience.priority} Priority
+                    </span>
+
+                    <span
+                      className={`badge ${
+                        experience.completed
+                          ? "completed-badge"
+                          : "pending-badge"
+                      }`}
+                    >
+                      {experience.completed ? "Completed" : "Not Completed"}
+                    </span>
+                  </div>
+
+                  <h3>{experience.title}</h3>
+
+                  <p className="location">{experience.location}</p>
+
+                  <p>{experience.description}</p>
+
+                  <Link
+                    to={`/experiences/${experience._id}`}
+                    className="text-link"
+                  >
+                    View Adventure
+                  </Link>
                 </div>
-
-                <h3>{experience.title}</h3>
-                <p className="location">{experience.location}</p>
-                <p>{experience.description}</p>
-
-                <Link
-                  to={`/experiences/${experience._id}`}
-                  className="text-link"
-                >
-                  View Adventure
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
