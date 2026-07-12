@@ -5,7 +5,6 @@ import Home from "./pages/Home";
 import AddAdventure from "./pages/AddAdventure";
 import AdventureDetails from "./pages/AdventureDetails";
 import EditAdventure from "./pages/EditAdventure";
-
 import "./App.css";
 
 function App() {
