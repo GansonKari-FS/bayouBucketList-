@@ -1,8 +1,10 @@
 import Experience from "../models/Experience.js";
 
+// GET all experiences
 export const getExperiences = async (req, res) => {
   try {
     const experiences = await Experience.find().sort({ created_at: -1 });
+
     res.status(200).json(experiences);
   } catch (error) {
     res.status(500).json({
@@ -12,12 +14,15 @@ export const getExperiences = async (req, res) => {
   }
 };
 
+// GET one experience
 export const getExperienceById = async (req, res) => {
   try {
     const experience = await Experience.findById(req.params.id);
 
     if (!experience) {
-      return res.status(404).json({ message: "Experience not found." });
+      return res.status(404).json({
+        message: "Experience not found.",
+      });
     }
 
     res.status(200).json(experience);
@@ -29,9 +34,11 @@ export const getExperienceById = async (req, res) => {
   }
 };
 
+// POST new experience
 export const createExperience = async (req, res) => {
   try {
     const experience = await Experience.create(req.body);
+
     res.status(201).json(experience);
   } catch (error) {
     res.status(400).json({
@@ -41,6 +48,7 @@ export const createExperience = async (req, res) => {
   }
 };
 
+// PUT or PATCH experience
 export const updateExperience = async (req, res) => {
   try {
     const experience = await Experience.findByIdAndUpdate(
@@ -53,7 +61,9 @@ export const updateExperience = async (req, res) => {
     );
 
     if (!experience) {
-      return res.status(404).json({ message: "Experience not found." });
+      return res.status(404).json({
+        message: "Experience not found.",
+      });
     }
 
     res.status(200).json(experience);
@@ -65,12 +75,15 @@ export const updateExperience = async (req, res) => {
   }
 };
 
+// DELETE experience
 export const deleteExperience = async (req, res) => {
   try {
     const experience = await Experience.findByIdAndDelete(req.params.id);
 
     if (!experience) {
-      return res.status(404).json({ message: "Experience not found." });
+      return res.status(404).json({
+        message: "Experience not found.",
+      });
     }
 
     res.status(200).json({
