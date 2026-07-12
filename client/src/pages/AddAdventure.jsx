@@ -7,14 +7,27 @@ const initialForm = {
   location: "",
   category: "Nature & Outdoors",
   description: "",
-  imageUrl: "",
+  imageUrl: "swamp",
   priority: "Medium",
   completed: false,
 };
 
+const imageOptions = [
+  { label: "Louisiana Swamp", value: "swamp" },
+  { label: "New Orleans", value: "newOrleans" },
+  { label: "Baton Rouge", value: "batonRouge" },
+  { label: "Historic Church", value: "church" },
+  { label: "Historic Plantation", value: "plantation" },
+  { label: "Mardi Gras", value: "mardiGrass" },
+  { label: "Louisiana Music", value: "music" },
+  { label: "Louisiana Scenic View", value: "hero" },
+];
+
 function AddAdventure() {
   const [formData, setFormData] = useState(initialForm);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -28,14 +41,22 @@ function AddAdventure() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     setError("");
+    setSubmitting(true);
 
     try {
       await api.post("/experiences", formData);
       navigate("/");
     } catch (err) {
-      console.error(err);
-      setError("Unable to save the adventure.");
+      console.error("Error creating adventure:", err);
+
+      setError(
+        err.response?.data?.message ||
+          "Unable to save the adventure. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -43,19 +64,25 @@ function AddAdventure() {
     <main className="page-section">
       <div className="form-container">
         <p className="eyebrow">New Louisiana Experience</p>
+
         <h1>Add an Adventure</h1>
-        <p>Add a place, event, meal, or experience you want to explore.</p>
+
+        <p className="form-intro">
+          Add a place, event, restaurant, festival, or experience you want to
+          explore in Louisiana.
+        </p>
 
         {error && <p className="error-message">{error}</p>}
 
         <form className="adventure-form" onSubmit={handleSubmit}>
           <label>
-            Adventure title
+            Adventure Title
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
+              placeholder="Example: Take a swamp tour"
               required
             />
           </label>
@@ -67,6 +94,7 @@ function AddAdventure() {
               name="location"
               value={formData.location}
               onChange={handleChange}
+              placeholder="Example: Atchafalaya Basin"
               required
             />
           </label>
@@ -78,14 +106,14 @@ function AddAdventure() {
               value={formData.category}
               onChange={handleChange}
             >
-              <option>Nature & Outdoors</option>
-              <option>Food & Restaurants</option>
-              <option>Festivals</option>
-              <option>History & Culture</option>
-              <option>Music & Nightlife</option>
-              <option>Road Trips</option>
-              <option>Hidden Gems</option>
-              <option>Family Activities</option>
+              <option value="Nature & Outdoors">Nature & Outdoors</option>
+              <option value="Food & Restaurants">Food & Restaurants</option>
+              <option value="Festivals">Festivals</option>
+              <option value="History & Culture">History & Culture</option>
+              <option value="Music & Nightlife">Music & Nightlife</option>
+              <option value="Road Trips">Road Trips</option>
+              <option value="Hidden Gems">Hidden Gems</option>
+              <option value="Family Activities">Family Activities</option>
             </select>
           </label>
 
@@ -96,9 +124,24 @@ function AddAdventure() {
               value={formData.priority}
               onChange={handleChange}
             >
-              <option>Low</option>
-              <option>Medium</option>
-              <option>High</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </label>
+
+          <label className="full-width">
+            Choose an Image
+            <select
+              name="imageUrl"
+              value={formData.imageUrl}
+              onChange={handleChange}
+            >
+              {imageOptions.map((image) => (
+                <option key={image.value} value={image.value}>
+                  {image.label}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -109,18 +152,8 @@ function AddAdventure() {
               value={formData.description}
               onChange={handleChange}
               rows="6"
+              placeholder="Describe what makes this adventure worth adding to your bucket list."
               required
-            />
-          </label>
-
-          <label className="full-width">
-            Image URL
-            <input
-              type="url"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
             />
           </label>
 
@@ -134,9 +167,24 @@ function AddAdventure() {
             I have already completed this adventure
           </label>
 
-          <button type="submit" className="primary-button">
-            Save Adventure
-          </button>
+          <div className="form-actions full-width">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => navigate("/")}
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={submitting}
+            >
+              {submitting ? "Saving..." : "Save Adventure"}
+            </button>
+          </div>
         </form>
       </div>
     </main>

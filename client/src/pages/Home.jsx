@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
+import imageMap from "../services/imageMap";
 
 function Home() {
   const [experiences, setExperiences] = useState([]);
@@ -87,16 +88,11 @@ function Home() {
           </div>
         )}
 
-        <div className="adventure-grid">
-          {experiences.map((experience) => (
-            <article className="adventure-card" key={experience._id}>
-              {experience.imageUrl && (
-                <img
-                  src={experience.imageUrl}
-                  alt={experience.title}
-                  className="adventure-image"
-                />
-              )}
+        <img
+  src={imageMap[experience.imageUrl] || imageMap.swamp}
+  alt={experience.title}
+  className="adventure-image"
+/>
 
               <div className="adventure-card-body">
                 <div className="card-badges">
