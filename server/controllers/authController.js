@@ -1,20 +1,14 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 const createToken = (userId) => {
   if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is missing from the server environment");
+    throw new Error("JWT_SECRET is missing from server/.env");
   }
 
-  return jwt.sign(
-    {
-      userId,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-    },
-  );
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
 };
 
 const formatUser = (user) => ({
@@ -24,11 +18,8 @@ const formatUser = (user) => ({
   createdAt: user.createdAt,
 });
 
-/*
-POST /api/auth/register
-Creates a new user and returns a JWT.
-*/
-const registerUser = async (req, res) => {
+// POST /api/auth/register
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -90,15 +81,13 @@ const registerUser = async (req, res) => {
 
     return res.status(500).json({
       message: "The user could not be registered.",
+      error: error.message,
     });
   }
 };
 
-/*
-POST /api/auth/login
-Checks the user's credentials and returns a JWT.
-*/
-const loginUser = async (req, res) => {
+// POST /api/auth/login
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -140,31 +129,23 @@ const loginUser = async (req, res) => {
 
     return res.status(500).json({
       message: "The user could not be logged in.",
+      error: error.message,
     });
   }
 };
 
-/*
-GET /api/auth/me
-Returns the currently authenticated user.
-The authentication middleware will add req.user.
-*/
-const getCurrentUser = async (req, res) => {
+// GET /api/auth/me
+export const getCurrentUser = async (req, res) => {
   try {
     return res.status(200).json({
       user: formatUser(req.user),
     });
   } catch (error) {
-    console.error("Current-user error:", error);
+    console.error("Get current user error:", error);
 
     return res.status(500).json({
       message: "The current user could not be retrieved.",
+      error: error.message,
     });
   }
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
-  getCurrentUser,
 };

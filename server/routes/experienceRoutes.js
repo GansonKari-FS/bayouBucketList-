@@ -8,7 +8,12 @@ import {
   deleteExperience,
 } from "../controllers/experienceController.js";
 
+import protect from "../middleware/authMiddleware.js";
+
 const router = express.Router();
+
+// Every experience route below this line requires a valid JWT.
+router.use(protect);
 
 router.get("/", getExperiences);
 router.get("/:id", getExperienceById);

@@ -1,23 +1,32 @@
 import Experience from "../models/Experience.js";
 
-// GET all experiences
+// GET all experiences belonging to the logged-in user
 export const getExperiences = async (req, res) => {
   try {
-    const experiences = await Experience.find().sort({ created_at: -1 });
+    const experiences = await Experience.find({
+      user: req.user._id,
+    }).sort({
+      createdAt: -1,
+    });
 
-    res.status(200).json(experiences);
+    return res.status(200).json(experiences);
   } catch (error) {
-    res.status(500).json({
+    console.error("Get experiences error:", error);
+
+    return res.status(500).json({
       message: "Unable to retrieve experiences.",
       error: error.message,
     });
   }
 };
 
-// GET one experience
+// GET one experience belonging to the logged-in user
 export const getExperienceById = async (req, res) => {
   try {
-    const experience = await Experience.findById(req.params.id);
+    const experience = await Experience.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
 
     if (!experience) {
       return res.status(404).json({
@@ -25,35 +34,68 @@ export const getExperienceById = async (req, res) => {
       });
     }
 
-    res.status(200).json(experience);
+    return res.status(200).json(experience);
   } catch (error) {
-    res.status(500).json({
+    console.error("Get experience error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(404).json({
+        message: "Experience not found.",
+      });
+    }
+
+    return res.status(500).json({
       message: "Unable to retrieve the experience.",
       error: error.message,
     });
   }
 };
 
-// POST new experience
+// POST a new experience for the logged-in user
 export const createExperience = async (req, res) => {
   try {
-    const experience = await Experience.create(req.body);
+    const experience = await Experience.create({
+      ...req.body,
+      user: req.user._id,
+    });
 
-    res.status(201).json(experience);
+    return res.status(201).json(experience);
   } catch (error) {
-    res.status(400).json({
+    console.error("Create experience error:", error);
+
+    return res.status(400).json({
       message: "Unable to create the experience.",
       error: error.message,
     });
   }
 };
 
-// PUT or PATCH experience
+// PUT or PATCH an experience belonging to the logged-in user
 export const updateExperience = async (req, res) => {
   try {
-    const experience = await Experience.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+    const allowedUpdates = {
+      title: req.body.title,
+      location: req.body.location,
+      category: req.body.category,
+      description: req.body.description,
+      imageUrl: req.body.imageUrl,
+      priority: req.body.priority,
+      completed: req.body.completed,
+    };
+
+    // Remove fields that were not included in the request
+    Object.keys(allowedUpdates).forEach((key) => {
+      if (allowedUpdates[key] === undefined) {
+        delete allowedUpdates[key];
+      }
+    });
+
+    const experience = await Experience.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        user: req.user._id,
+      },
+      allowedUpdates,
       {
         new: true,
         runValidators: true,
@@ -66,19 +108,30 @@ export const updateExperience = async (req, res) => {
       });
     }
 
-    res.status(200).json(experience);
+    return res.status(200).json(experience);
   } catch (error) {
-    res.status(400).json({
+    console.error("Update experience error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(404).json({
+        message: "Experience not found.",
+      });
+    }
+
+    return res.status(400).json({
       message: "Unable to update the experience.",
       error: error.message,
     });
   }
 };
 
-// DELETE experience
+// DELETE an experience belonging to the logged-in user
 export const deleteExperience = async (req, res) => {
   try {
-    const experience = await Experience.findByIdAndDelete(req.params.id);
+    const experience = await Experience.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+    });
 
     if (!experience) {
       return res.status(404).json({
@@ -86,11 +139,20 @@ export const deleteExperience = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Experience deleted successfully.",
+      experience,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Delete experience error:", error);
+
+    if (error.name === "CastError") {
+      return res.status(404).json({
+        message: "Experience not found.",
+      });
+    }
+
+    return res.status(500).json({
       message: "Unable to delete the experience.",
       error: error.message,
     });
